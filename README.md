@@ -4,8 +4,18 @@
 
 iOS app developed for personal use to track expenses and manage budgets
 
+## Table of Contents 🗞️
+1. [Tools Used](#tools-used-)
+2. [Features](#features-)
+3. [Visuals](#visuals-)
+
 ## Tools Used 🔧
 - Swift | SwiftUI | Core Data
+
+## Features 🎮
+- Data Persistence 
+- Minimalistic design
+- Allows user to scroll to see all expenses
 
 ## Visuals ✨
 
