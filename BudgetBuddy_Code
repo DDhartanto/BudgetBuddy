@@ -1,0 +1,128 @@
+import SwiftUI // imports the swiftUI framework, which creates the user interface
+
+// Expense model that gives each one a id
+struct Expense: Identifiable {
+    let id = UUID()
+    let description: String
+    let amount: Double
+}
+
+// The main view of the app, which the user interacts with
+struct ContentView: View {
+    //Stores the apps' dynamic data
+    //The @state property wrapper lets SwiftUI track and update the UI accordingly
+    @State private var name: String = ""
+    @State private var salary: String = ""
+    @State private var expenses: [Expense] = []
+    @State private var expenseDescription: String = ""
+    @State private var expenseAmount: String = ""
+    @State private var remainingBudget: Double = 0.0
+
+    // defines the view's layout and appearance
+    var body: some View {
+        // Wraps the content in a navigation interface, allowing for navigation-related features like the title
+        NavigationView {
+            // A vertical stack that arranges elements in a vertical layout. The spacing sets the space between elements to 20 points
+            VStack(spacing: 20) {
+                // Allows user to input their name and salary
+                VStack(alignment: .leading, spacing: 8) {
+                    TextField("Enter your name", text: $name)
+                        .padding() // adds padding around the text field
+                        .background(Color(.systemGray6)) // sets the background color of the text field
+                        .cornerRadius(10) // rounds the corners of the text field
+
+                    TextField("Enter your salary", text: $salary)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .keyboardType(.decimalPad) // sets the keyboard type to numeric with a decimal point
+                }
+                .padding()
+
+                // Allows the user to input the description and amount of a new expense
+                VStack(alignment: .leading, spacing: 8) {
+                    TextField("Expense Description", text: $expenseDescription)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+
+                    TextField("Expense Amount", text: $expenseAmount)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .keyboardType(.decimalPad)
+                }
+                .padding()
+
+                // Button to add expense
+                Button(action: {
+                    addExpense()
+                }) {
+                    Text("Add Expense")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+
+                // List of expenses
+                List {
+                    ForEach(expenses) { expense in
+                        HStack {    //A horizontal stack that aligns the expenses decrioption on the left to the amount on the right
+                            Text(expense.description)
+                            Spacer()
+                            Text("$\(expense.amount, specifier: "%.2f")")
+                        }
+                    }
+                    .onDelete(perform: deleteExpense) // enables swipe to delete functionality
+                }
+                .listStyle(PlainListStyle())
+
+                // Remaining budget display
+                Text("Remaining Budget: $\(remainingBudget, specifier: "%.2f")")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(remainingBudget >= 0 ? .green : .red)
+                    .padding()
+
+                Spacer()
+            }
+            .navigationTitle("Budget Manager")
+            .onAppear(perform: calculateRemainingBudget)
+        }
+    }
+
+    // Function to add an expense
+    // guard let amount = Double(expenseAmount): Converts the inputted amount to a Double. If conversion fails or if the description is empty, the function returns early
+    private func addExpense() {
+        guard let amount = Double(expenseAmount), !expenseDescription.isEmpty else { return }
+        let newExpense = Expense(description: expenseDescription, amount: amount)
+        expenses.append(newExpense)
+        expenseDescription = ""
+        expenseAmount = ""
+        calculateRemainingBudget()
+    }
+
+    // Function to delete an expense and recalculates the remaining budget
+    // atOffsets - the indices of the expenses to remove
+    private func deleteExpense(at offsets: IndexSet) {
+        expenses.remove(atOffsets: offsets)
+        calculateRemainingBudget()
+    }
+
+    // Function to calculate remaining budget by subtracting the total of all expenses from the salary
+    private func calculateRemainingBudget() {
+        let salaryValue = Double(salary) ?? 0
+        let totalExpenses = expenses.reduce(0) { $0 + $1.amount } // sums all the amounts in the 'expenses' array
+        remainingBudget = salaryValue - totalExpenses
+    }
+}
+// Provides a preview of the ContentView in Xcode's canvas
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
